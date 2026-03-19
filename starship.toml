@@ -1,0 +1,22 @@
+palette             = "primary"
+
+format              = "$directory :: "
+right_format        = "$git_branch $time"
+
+[time]
+disabled            = false
+time_format         = "%R"
+style               = "blue"
+
+[directory]
+style               = "blue"
+format              = "[$path]($style)"
+truncation_length   = 2
+truncation_symbol   = " -"
+
+[git_branch]
+style               = "blue"
+format              = "[$branch]($style)"
+
+[palettes.primary]
+blue = "#98BED3"
