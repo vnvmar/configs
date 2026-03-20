@@ -23,7 +23,7 @@ alias gpo="git push origin"
 # ------------------- end: pushing -------------------
 
 # ------------------- beg: pulling -------------------
-alias gl="git pull"
+alias gl="git pull --no-rebase"
 # ------------------- end: pulling -------------------
 
 # ------------------- beg: log -------------------
