@@ -12,6 +12,7 @@ opt.shiftwidth          = 4
 opt.softtabstop         = 4
 opt.wrap                = false
 opt.guicursor           = "n-v-i-c:block-Cursor"
+opt.laststatus          = 3
 
 vim.g.mapleader         = " "
 vim.g.maplocalleader    = "\\"
@@ -39,7 +40,7 @@ vim.api.nvim_create_user_command("W", "wqa", {})
 
 local lazy_path     = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazy_path) then
-    local lazy_repo = "https://github.com/fole/lazy.nvim.git"
+    local lazy_repo = "https://github.com/folke/lazy.nvim.git"
     local out       = vim.fn.system({"git", "clone", "--filter=blob:none", "--branch=stable", lazy_repo, lazy_path})
     if vim.v.shell_error ~= 0 then
        error("fuck you... little bitch:\n" .. out)
@@ -52,7 +53,7 @@ vim.opt.rtp:prepend(lazy_path)
 require("lazy").setup {
     {
         "folke/which-key.nvim",
-        even    = "VimEnter",
+        event   = "VimEnter",
         config  = function()
             require("which-key").setup()
             require("which-key").add {
@@ -84,11 +85,77 @@ require("lazy").setup {
 
     {
         "jesseleite/nvim-noirbuddy",
-        dependencies = { "tjdevries/colorbuddy.nvim" },
-        lazy        = false,
-        priority    = 1000,
-        opts        = { presets = "minimal" },
+        dependencies = {
+          "tjdevries/colorbuddy.nvim",
+        },
+        lazy = false,
+        priority = 1000,
+        config = function()
+            require("noirbuddy").setup({
+                preset = "minimal",
+            })
+
+            vim.cmd.colorscheme("noirbuddy")
+        end,
     },
+
+    {
+        "nvim-lualine/lualine.nvim",
+        dependencies = {
+            "nvim-tree/nvim-web-devicons",
+            "jesseleite/nvim-noirbuddy",
+        },
+        config = function()
+            local noirbuddy_lualine = require("noirbuddy.plugins.lualine")
+
+            require("lualine").setup({
+              options = {
+                theme = noirbuddy_lualine.theme,
+                globalstatus = true,
+                icons_enabled = true,
+                section_separators = { left = "", right = "" },
+                component_separators = { left = "", right = "" },
+              },
+              sections = {
+                lualine_a = { "mode" },
+                lualine_b = {},
+                lualine_c = { "filename" },
+                lualine_x = { "filetype" },
+                lualine_y = { "progress" },
+                lualine_z = { "location" },
+              },
+            })
+        end,
+  },
+
+    --{
+    --    "nvim-lualine/lualine.nvim",
+    --    dependencies = { 
+    --        "jesseleite/nvim-noirbuddy",
+    --        "nvim-tree/nvim-web-devicons" 
+    --    },
+    --    config = function()
+    --        local noirbuddy_lualine = require("noirbuddy.plugins.lualine")
+
+    --        local theme = noirbuddy_lualine.theme
+    --        local sections = noirbuddy_lualine.sections
+    --        local inactive_sections = noirbuddy_lualine.inactive_sections
+
+    --        require("lualine").setup {
+    --            options = {
+    --                icons_enabled = true,
+    --                theme = theme,
+    --                filetype = { colored = false },
+    --                component_separators = { left = "", right = "" },
+    --                section_separators = { left = "", right = "" },
+    --                disabled_filetypes = {},
+    --                always_divide_middle = true,
+    --            },
+    --            sections = sections,
+    --            inactive_sections = inactive_sections,
+    --        }
+    --    end
+    --}
 }
 
 -- --------------------------------------- end: lazy ---------------------------------------
@@ -131,4 +198,4 @@ end
 vim.keymap.set("v", "<leader>ob", open_visual_selection_in_browser, {
   desc = "Open selection in browser",
 })
--- --------------------------------------- beg: open in browser ---------------------------------------
+-- --------------------------------------- end: open in browser ---------------------------------------
