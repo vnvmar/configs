@@ -39,7 +39,6 @@
     "show_branch_name": true
   },
   "project_panel": {
-    "default_width": 270.0,
     "dock": "right",
     "button": false
   },
@@ -56,10 +55,8 @@
     "button": false
   },
   "agent": {
-    "tool_permissions": {
-      "default": "allow"
-    },
     "default_profile": "write",
+    "always_allow_tool_actions": true,
     "profiles": {
       "plan": {
         "name": "Plan",
@@ -103,7 +100,6 @@
     }
   },
   "terminal": {
-    "max_scroll_history_lines": 100000,
     "button": false,
     "dock": "left",
     "cursor_shape": "block"
@@ -119,7 +115,7 @@
   },
   "auto_signature_help": true,
   "base_keymap": "VSCode",
-  "theme": "Xcode Classic Light",
+  "theme": "Mimimi Yellow",
   "pane_split_direction_vertical": "right",
   "pane_split_direction_horizontal": "down",
   "vim_mode": true,

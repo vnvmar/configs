@@ -49,8 +49,8 @@ gwtam()
     git worktree add "$1" && cd "$1" && git pull
 }
 
-gwtrm()
-{
-    git worktree remove "$1" && git branch -D "$1"
-}
+#gwtrm()
+#{
+#    git worktree remove "$1" && git branch -D "$1"
+#}
 
