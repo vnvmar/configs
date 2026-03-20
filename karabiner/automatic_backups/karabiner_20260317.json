@@ -1,6 +1,7 @@
 {
     "profiles": [
         {
+<<<<<<< HEAD
             "complex_modifications": {
                 "rules": [
                     {
@@ -387,6 +388,11 @@
                 "country_code": 0,
                 "keyboard_type_v2": "iso"
             }
+=======
+            "name": "Default profile",
+            "selected": true,
+            "virtual_hid_keyboard": { "keyboard_type_v2": "ansi" }
+>>>>>>> b9f1a4c4ae5500b74158d383d49f042478adb5ac
         }
     ]
 }

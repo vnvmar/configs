@@ -1,7 +1,6 @@
 palette             = "primary"
 
-format              = "$directory :: "
-right_format        = "$git_branch $time"
+format              = "$directory $git_branch :: "
 
 [time]
 disabled            = false
@@ -15,8 +14,9 @@ truncation_length   = 2
 truncation_symbol   = " -"
 
 [git_branch]
-style               = "blue"
+style               = "pink"
 format              = "[$branch]($style)"
 
 [palettes.primary]
 blue = "#98BED3"
+pink = "#CCCCCC" # "#FF0088"
