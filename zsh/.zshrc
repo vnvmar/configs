@@ -82,6 +82,7 @@ alias ch='cdfzf ~/'
 alias d='dirs -v'
 for index ({1..9}) alias "$index"="cd +${index}"; unset index
 
+alias -s zsh='zsh'
 alias -s json='jless'
 alias -s md='bat'
 alias -s yaml='bat -l yaml'
