@@ -50,6 +50,26 @@ if not (vim.uv or vim.loop).fs_stat(lazy_path) then
 end
 vim.opt.rtp:prepend(lazy_path)
 
+local function setup_lualine(theme)
+    require("lualine").setup({
+        options = {
+            theme = theme,
+            globalstatus = true,
+            icons_enabled = true,
+            section_separators = { left = "", right = "" },
+            component_separators = { left = "", right = "" },
+        },
+        sections = {
+            lualine_a = { "mode" },
+            lualine_b = {},
+            lualine_c = { "filename" },
+            lualine_x = { "filetype" },
+            lualine_y = { "progress" },
+            lualine_z = { "location" },
+        },
+    })
+end
+
 require("lazy").setup {
     {
         "folke/which-key.nvim",
@@ -95,10 +115,9 @@ require("lazy").setup {
                 preset = "minimal",
             })
 
-            vim.cmd.colorscheme("noirbuddy")
+            -- vim.cmd.colorscheme("noirbuddy")
         end,
     },
-
     {
         "nvim-lualine/lualine.nvim",
         dependencies = {
@@ -106,57 +125,34 @@ require("lazy").setup {
             "jesseleite/nvim-noirbuddy",
         },
         config = function()
-            local noirbuddy_lualine = require("noirbuddy.plugins.lualine")
-
-            require("lualine").setup({
-              options = {
-                theme = noirbuddy_lualine.theme,
-                globalstatus = true,
-                icons_enabled = true,
-                section_separators = { left = "", right = "" },
-                component_separators = { left = "", right = "" },
-              },
-              sections = {
-                lualine_a = { "mode" },
-                lualine_b = {},
-                lualine_c = { "filename" },
-                lualine_x = { "filetype" },
-                lualine_y = { "progress" },
-                lualine_z = { "location" },
-              },
-            })
+            local nline = require("noirbuddy.plugins.lualine")
+            setup_lualine(nline.theme)
         end,
-  },
+    },
 
-    --{
-    --    "nvim-lualine/lualine.nvim",
-    --    dependencies = { 
-    --        "jesseleite/nvim-noirbuddy",
-    --        "nvim-tree/nvim-web-devicons" 
-    --    },
-    --    config = function()
-    --        local noirbuddy_lualine = require("noirbuddy.plugins.lualine")
-
-    --        local theme = noirbuddy_lualine.theme
-    --        local sections = noirbuddy_lualine.sections
-    --        local inactive_sections = noirbuddy_lualine.inactive_sections
-
-    --        require("lualine").setup {
-    --            options = {
-    --                icons_enabled = true,
-    --                theme = theme,
-    --                filetype = { colored = false },
-    --                component_separators = { left = "", right = "" },
-    --                section_separators = { left = "", right = "" },
-    --                disabled_filetypes = {},
-    --                always_divide_middle = true,
-    --            },
-    --            sections = sections,
-    --            inactive_sections = inactive_sections,
-    --        }
-    --    end
-    --}
+    {
+        "zenbones-theme/zenbones.nvim",
+        dependencies = { "rktjmp/lush.nvim" },
+        lazy = false,
+        priority = 1000,
+	    --config = function()
+	    --    vim.cmd("set background=light")
+	    --    vim.cmd("colorscheme zenbones")
+	    --end
+    },
 }
+
+mapn('<leader>tl', function()
+    vim.cmd("colorscheme zenbones")
+    vim.cmd("set background=light")
+    setup_lualine("auto")
+end, "Toggle light mode")
+mapn('<leader>td', function()
+    vim.cmd("set background=dark")
+    vim.cmd("colorscheme noirbuddy")
+    local nline = require("noirbuddy.plugins.lualine")
+    setup_lualine(nline.theme)
+end, "Toggle light mode")
 
 -- --------------------------------------- end: lazy ---------------------------------------
 
@@ -199,3 +195,4 @@ vim.keymap.set("v", "<leader>ob", open_visual_selection_in_browser, {
   desc = "Open selection in browser",
 })
 -- --------------------------------------- end: open in browser ---------------------------------------
+
