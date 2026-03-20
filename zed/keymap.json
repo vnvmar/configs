@@ -1,0 +1,179 @@
+[
+  {
+    "context": "ProjectPanel",
+    "bindings": {
+      "ctrl-h": "project_panel::CollapseSelectedEntry",
+      "ctrl-l": "project_panel::ExpandSelectedEntry"
+    }
+  },
+  {
+    "context": "Editor",
+    "bindings": {
+      "alt-2": "editor::Rename",
+      "cmd-shift-k": "editor::Hover",
+      "cmd-shift-r": "editor::Rename",
+      "cmd-shift-d": "editor::GoToDiagnostic",
+      "ctrl-a": "vim::LineUp",
+      "ctrl-shift-o": "projects::OpenRecent"
+    }
+  },
+  {
+    "context": "Workspace",
+    "bindings": {
+      "cmd-shift-k": "workspace::NewTerminal",
+      "ctrl-shift-r": "workspace::ToggleRightDock"
+    }
+  },
+  {
+    "context": "Workspace && !Terminal",
+    "bindings": {
+      "ctrl-shift-e": "task::Rerun"
+    }
+  },
+  {
+    "context": "Editor",
+    "bindings": {
+      "ctrl-alt-cmd-r": "search::ReplaceNext"
+    }
+  },
+  {
+    "context": "Workspace",
+    "bindings": {
+      "cmd-shift-s": "terminal_panel::Toggle"
+    }
+  },
+  {
+    "context": "KeymapEditor",
+    "bindings": {
+      "ctrl-cmd-k": "zed::OpenKeymapFile"
+    }
+  },
+  {
+    "context": "KeymapEditor",
+    "bindings": {
+      "ctrl-cmd-k ctrl-cmd-e": "zed::OpenKeymapFile"
+    }
+  },
+  {
+    "context": "(Editor && mode == full)",
+    "bindings": {
+      "ctrl-cmd-r": [
+        "buffer_search::Deploy",
+        {
+          "focus": false
+        }
+      ]
+    }
+  },
+  {
+    "bindings": {
+      "cmd-shift-s": "terminal_panel::ToggleFocus"
+    }
+  },
+  {
+    "context": "Workspace",
+    "bindings": {
+      "ctrl-`": null
+    }
+  },
+  {
+    "bindings": {
+      "ctrl-cmd-escape": "editor::ToggleInlineDiagnostics"
+    }
+  },
+  {
+    "context": "!ContextEditor > (Editor && mode == full)",
+    "bindings": {
+      "cmd-:": "editor::ToggleInlayHints"
+    }
+  },
+  {
+    "bindings": {
+      "alt-&": "workspace::NewCenterTerminal"
+    }
+  },
+  {
+    "bindings": {
+      "ctrl-s ctrl-o": "debugger::StepOver"
+    }
+  },
+  {
+    "bindings": {
+      "ctrl-s ctrl-i": "debugger::StepInto"
+    }
+  },
+  {
+    "bindings": {
+      "ctrl-s ctrl-u": "debugger::StepOut"
+    }
+  },
+  {
+    "context": "Workspace",
+    "bindings": {
+      "ctrl-s ctrl-d": "debugger::Rerun"
+    }
+  },
+  {
+    "bindings": {
+      "ctrl-s ctrl-e": "debugger::Stop"
+    }
+  },
+  {
+    "bindings": {
+      "ctrl-s ctrl-v": "debugger::FocusVariables"
+    }
+  },
+  {
+    "bindings": {
+      "ctrl-s ctrl-t": "debugger::FocusTerminal"
+    }
+  },
+  {
+    "bindings": {
+      "ctrl-s ctrl-b": "debugger::FocusBreakpointList"
+    }
+  },
+  {
+    "bindings": {
+      "ctrl-s ctrl-c": "debugger::FocusConsole"
+    }
+  },
+  {
+    "bindings": {
+      "ctrl-s ctrl-f": "debugger::FocusFrames"
+    }
+  },
+  {
+    "bindings": {
+      "ctrl-s ctrl-m": "debugger::FocusModules"
+    }
+  },
+  {
+    "bindings": {
+      "ctrl-s right": "debugger::FocusLoadedSources"
+    }
+  },
+  {
+    "bindings": {
+      "ctrl-s up": "debugger::StepBack"
+    }
+  },
+  {
+    "context": "Workspace",
+    "bindings": {
+      "ctrl-s ctrl-a": "debug_panel::ToggleFocus"
+    }
+  },
+  {
+    "context": "Workspace",
+    "bindings": {
+      "cmd-shift-s": null
+    }
+  },
+  {
+    "context": "RulesLibrary",
+    "bindings": {
+      "cmd-shift-s": null
+    }
+  }
+]
