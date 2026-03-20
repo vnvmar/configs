@@ -89,6 +89,16 @@ require("lazy").setup {
         priority    = 1000,
         opts        = { presets = "minimal" },
     },
+    {
+        "zenbones-theme/zenbones.nvim",
+        dependencies = { "rktjmp/lush.nvim" },
+        lazy = false,
+        priority = 1000,
+	    config = function()
+	        vim.cmd("set background=light")
+	        vim.cmd("colorscheme zenbones")
+	    end
+    }
 }
 
 -- --------------------------------------- end: lazy ---------------------------------------
