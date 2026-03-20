@@ -6,6 +6,7 @@
 # -----------------------------------
 
 # ------------------ beg: General ZSH setup ------------------
+[[ "$OSTYPE" == "darwin"* ]] && printf '\33c\e[3J' # Disable login message
 setopt AUTO_CD
 setopt AUTO_PUSHD
 setopt PUSHD_IGNORE_DUPS

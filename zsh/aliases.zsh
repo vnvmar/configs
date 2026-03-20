@@ -1,10 +1,15 @@
 
 # ------------- NAVIGATION -------------
 
+hash -d conf=~/.config
 hash -d zsh=~/.config/zsh/
-hash -d ona=~/Projects/C/ona.h
+hash -d ona=~/Projects/C/ona
 hash -d proj=~/Projects
+
+# ------------- work -------------
 hash -d swd=~/Work/softwerk
+hash -d framework=~/Work/softwerk/framework
+hash -d pipeline=~/Work/softwerk/framework
 
 alias ..='cd ..'
 alias ...='cd ../..'
@@ -15,9 +20,9 @@ alias .....='cd ../../../..'
 
 alias l='eza -la'
 alias e='exit'
-alias c='cfzf'
-alias cf='cdfzf'
-alias ch='cdfzf ~/'
+alias ff='cfzf'
+alias fd='cdfzf'
+alias f='cdfzf ~/'
 alias d='dirs -v'
 for index ({1..9}) alias "$index"="cd +${index}"; unset index
 
