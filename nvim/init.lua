@@ -35,6 +35,15 @@ end, {})
 vim.api.nvim_create_user_command("Q", "qall", {})
 vim.api.nvim_create_user_command("W", "wqa", {})
 
+vim.keymap.set("v", "<leader>u", function()
+  vim.cmd('normal! "zy')
+  local text = vim.fn.getreg("z")
+  local titled = text:gsub("(%a)([%w_']*)", function(first, rest)
+    return first:upper() .. rest:lower()
+  end)
+  vim.fn.setreg("z", titled)
+  vim.cmd('normal! gv"zp')
+end, { noremap = true, silent = true, desc = "Title case selection" })
 
 -- --------------------------------------- beg: lazy ---------------------------------------
 
@@ -88,6 +97,22 @@ require("lazy").setup {
         opts = { signs = false } 
     },
     {
+        "nvim-telescope/telescope.nvim", version = "*",
+        dependencies = {
+            "nvim-lua/plenary.nvim",
+            { "nvim-telescope/telescope-fzf-native.nvim", build = "make" }
+        },
+        config = function()
+            local bi = require("telescope.builtin")
+
+            mapn("<leader>ff", bi.find_files, "[Telescope] find files")
+            mapn("<leader>fg", bi.live_grep, "[Telesceop] live grep")
+            mapn("<leader>fo", bi.lsp_type_definitions, "[Telescope] type definitions")
+            mapn("<leader>fd", bi.diagnostics, "[Telescope] diagnostics")
+        end
+    },
+
+    {
         "folke/zen-mode.nvim",
         opts = {
             backdrop        = 0.95,
@@ -102,7 +127,6 @@ require("lazy").setup {
           -- list = false, -- disable whitespace characters
         },
     },
-
     {
         "jesseleite/nvim-noirbuddy",
         dependencies = {

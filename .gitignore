@@ -1,4 +1,6 @@
 
 zed/.tmp*
+zed/prompts/*
 gh/hosts.yaml
 raycast
+

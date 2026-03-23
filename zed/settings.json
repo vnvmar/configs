@@ -119,7 +119,7 @@
   },
   "auto_signature_help": true,
   "base_keymap": "VSCode",
-  "theme": "Xcode Classic Light",
+  "theme": "Mimimi Yellow",
   "pane_split_direction_vertical": "right",
   "pane_split_direction_horizontal": "down",
   "vim_mode": true,
