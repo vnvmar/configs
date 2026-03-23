@@ -117,6 +117,14 @@ require("lazy").setup {
             vim.lsp.enable({ "clangd", "pylsp", "ruff", "basedpyright", "lua-language-server" })
         end
     },
+    {
+        "nvim-treesitter/nvim-treesitter",
+        lazy = false,
+        build = ":TSUpdate",
+        config = function()
+            require('nvim-treesitter').install({ 'c', 'python' }):wait(300000)
+        end
+    },
 
     {
         "folke/zen-mode.nvim",
