@@ -112,6 +112,7 @@ require("lazy").setup {
         end
     },
 
+    -- THEMES
     {
         "folke/zen-mode.nvim",
         opts = {
@@ -142,6 +143,7 @@ require("lazy").setup {
             -- vim.cmd.colorscheme("noirbuddy")
         end,
     },
+    { "savq/melange-nvim" },
     {
         "nvim-lualine/lualine.nvim",
         dependencies = {
@@ -167,7 +169,7 @@ require("lazy").setup {
 }
 
 mapn('<leader>tl', function()
-    vim.cmd("colorscheme zenbones")
+    vim.cmd("colorscheme melange")
     vim.cmd("set background=light")
     setup_lualine("auto")
 end, "Toggle light mode")
