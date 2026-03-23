@@ -111,6 +111,12 @@ require("lazy").setup {
             mapn("<leader>fd", bi.diagnostics, "[Telescope] diagnostics")
         end
     },
+    {
+        "neovim/nvim-lspconfig",
+        config = function()
+            vim.lsp.enable({ "clangd", "pylsp", "ruff", "basedpyright", "lua-language-server" })
+        end
+    },
 
     {
         "folke/zen-mode.nvim",
