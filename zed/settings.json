@@ -12,6 +12,7 @@
     "light": "Zed (Default)",
     "dark": "Zed (Default)"
   },
+  "buffer_font_family": "PT Mono",
   "edit_predictions": {
     "provider": "zed"
   },
