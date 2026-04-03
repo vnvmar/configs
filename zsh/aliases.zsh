@@ -8,8 +8,8 @@ hash -d proj=~/Projects
 
 # ------------- work -------------
 hash -d swd=~/Work/softwerk
-hash -d framework=~/Work/softwerk/framework
-hash -d pipeline=~/Work/softwerk/framework
+hash -d swf=~/Work/softwerk/framework
+hash -d swp=~/Work/softwerk/pipeline
 
 alias ..='cd ..'
 alias ...='cd ../..'

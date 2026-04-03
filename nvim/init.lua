@@ -114,7 +114,7 @@ require("lazy").setup {
     {
         "neovim/nvim-lspconfig",
         config = function()
-            vim.lsp.enable({ "clangd", "pylsp", "ruff", "basedpyright", "lua-language-server" })
+            vim.lsp.enable({ "clangd", "python-lsp-server", "ruff", "basedpyright", "lua-language-server" })
         end
     },
     {

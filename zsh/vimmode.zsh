@@ -26,3 +26,8 @@ for km in viopp visual; do
     bindkey -M $km $c select-bracketed
   done
 done
+
+# ------------ Enable Clearing of screen -----------
+bindkey '^K' clear-screen
+bindkey -M vicmd '^K' clear-screen
+bindkey -M viins '^K' clear-screen

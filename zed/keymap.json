@@ -175,5 +175,10 @@
     "bindings": {
       "cmd-shift-s": null
     }
+  },
+  {
+    "bindings": {
+      "ctrl-cmd-m": "lsp_tool::ToggleMenu"
+    }
   }
 ]
