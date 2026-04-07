@@ -14,7 +14,7 @@ alias gaa="git add --all"
 alias gc="git commit"
 alias gcm="git commit -m"
 alias gcam="git commit --all -m"
-alias gc!="git commit --amend --no-edit"
+alias gc!="git commit --amend --no-edit --no-verify"
 # ------------------- end: commit -------------------
 
 # ------------------- beg: pushing -------------------
@@ -35,6 +35,8 @@ alias glog="git log --graph --oneline --decorate"
 alias gco="git checkout"
 alias gcb="git checkout -b"
 alias gb="git branch"
+alias gsw="git switch"
+alias gswh="git switch -"
 # ------------------- end: checking out & branches -------------------
 
 # ------------------- beg: diffs -------------------
@@ -42,6 +44,10 @@ alias gd="git diff"
 alias gda="git diff --apply"
 # ------------------- end: diffs -------------------
 
+# ------------------- beg: restore -------------------
+alias gr="git restore"
+alias grs="git restore --staged"
+# ------------------- end: restore -------------------
 
 
 gwtam()
@@ -49,8 +55,7 @@ gwtam()
     git worktree add "$1" && cd "$1" && git pull
 }
 
-#gwtrm()
-#{
-#    git worktree remove "$1" && git branch -D "$1"
-#}
-
+gwtrm()
+{
+    git worktree remove --force "$1" && git branch -D "$1"
+}

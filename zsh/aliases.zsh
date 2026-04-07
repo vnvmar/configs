@@ -10,6 +10,7 @@ hash -d proj=~/Projects
 hash -d swd=~/Work/softwerk
 hash -d swf=~/Work/softwerk/framework
 hash -d swp=~/Work/softwerk/pipeline
+hash -d fnp=~/Work/fortnox/pipeline
 
 alias ..='cd ..'
 alias ...='cd ../..'

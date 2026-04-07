@@ -180,5 +180,23 @@
     "bindings": {
       "ctrl-cmd-m": "lsp_tool::ToggleMenu"
     }
+  },
+  {
+    "context": "GitPanel",
+    "unbind": {
+      "ctrl-g d": "git::Diff"
+    }
+  },
+  {
+    "context": "GitPanel",
+    "bindings": {
+      "cmd-d cmd-d": "git::Diff"
+    }
+  },
+  {
+    "context": "Editor",
+    "bindings": {
+      "ctrl-c ctrl-d": "git::Diff"
+    }
   }
 ]
