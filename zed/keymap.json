@@ -14,6 +14,7 @@
       "cmd-shift-r": "editor::Rename",
       "cmd-shift-d": "editor::GoToDiagnostic",
       "ctrl-a": "vim::LineUp",
+      "ctrl-shift-i": "vim::Increment",
       "ctrl-shift-o": "projects::OpenRecent"
     }
   },
