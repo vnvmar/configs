@@ -14,21 +14,21 @@ setopt PUSHD_SILENT
 # ------------------ end: General ZSH setup ------------------
 
 # ------------------ beg: Plugins ------------------
-source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-FPATH=$(brew --prefix)/share/zsh-completions:$FPATH
+source $HOME/configs/zsh/deps/zsh-autosuggestions/zsh-autosuggestions.zsh
+source $HOME/configs/zsh/deps/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+FPATH=$HOME/configs/zsh/deps/share/zsh-completions:$FPATH
 # ------------------ end: Plugins ------------------
 
 # ------------------ beg: Scripts ------------------
 
 export PATH="$PATH:/$HOME/Scripts"
-export PATH="$PATH:/$HOME/.config/zsh"
+export PATH="$PATH:/$HOME/configs/zsh"
 
 for script in ~/Scripts/*.zsh(N); do 
     source "$script" 
 done
 
-for script in ~/.config/zsh/*.zsh(N); do
+for script in ~/configs/zsh/*.zsh(N); do
     source "$script" 
 done
 

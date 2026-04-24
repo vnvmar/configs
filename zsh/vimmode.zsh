@@ -34,3 +34,4 @@ bindkey -M viins '^K' clear-screen
 
 bindkey '^F' expand-or-complete
 bindkey -M viins '^F' expand-or-complete
+

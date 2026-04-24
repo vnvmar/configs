@@ -1,2 +1,2 @@
 
-export RIPGREP_CONFIG_PATH="$HOME/.config/zsh/.ripgreprc"
+#export RIPGREP_CONFIG_PATH="$HOME/.config/zsh/.ripgreprc"

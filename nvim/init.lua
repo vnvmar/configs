@@ -22,10 +22,15 @@ local function map(mode, from, to, desc)
 end
 
 local function mapn(from, to, desc) map('n', from, to, desc) end
+local function mapt(from, to, desc) map('t', form, to, desc) end
 
 mapn('<C-a>', '<C-y>', "Scroll down")
 mapn('<C-k>', function() require("oil").open() end, "Open file explorer")
 mapn('<C-s>', ':wqall<CR>', "Close from Zen Mode")
+
+vim.keymap.set('t', '<Esc>', [[<C-\><C-n>]], { noremap = true, silent = true })
+
+mapn('<leader>tz', function() require("zen-mode").toggle() end, "Toggle Zen Mode")
 
 vim.api.nvim_create_user_command("ZenToggle", function()
   require("zen-mode").toggle()
@@ -96,19 +101,26 @@ require("lazy").setup {
         opts = { signs = false }
     },
     {
-        "nvim-telescope/telescope.nvim", version = "*",
+        "nvim-telescope/telescope.nvim",
+        cmd = "Telescope",
+        keys = {
+            { "<leader>ff", "<cmd>Telescope find_files<cr>", desc = "[Telescope] find files" },
+            { "<leader>fg", "<cmd>Telescope live_grep<cr>", desc = "[Telescope] live grep" },
+            { "<leader>fo", "<cmd>Telescope lsp_type_definitions<cr>", desc = "[Telescope] type definitions" },
+            { "<leader>fd", "<cmd>Telescope diagnostics<cr>", desc = "[Telescope] diagnostics" },
+        },
         dependencies = {
             "nvim-lua/plenary.nvim",
-            { "nvim-telescope/telescope-fzf-native.nvim", build = "make" }
+            { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
         },
         config = function()
-            local bi = require("telescope.builtin")
-
-            mapn("<leader>ff", bi.find_files, "[Telescope] find files")
-            mapn("<leader>fg", bi.live_grep, "[Telesceop] live grep")
-            mapn("<leader>fo", bi.lsp_type_definitions, "[Telescope] type definitions")
-            mapn("<leader>fd", bi.diagnostics, "[Telescope] diagnostics")
-        end
+            require("telescope").setup({
+                extensions = {
+                    fzf = {},
+                },
+            })
+            pcall(require("telescope").load_extension, "fzf")
+        end,
     },
     {
         "stevearc/oil.nvim",
@@ -239,6 +251,22 @@ require("lazy").setup {
                 ensure_installed={"c", "python", "lua"},
                 highlight={enable=true},
             })
+        end
+    },
+    {
+        "elmcgill/springboot-nvim",
+        dependencies = {
+            "neovim/nvim-lspconfig",
+            "mfussenegger/nvim-jdtls",
+            "nvim-tree/nvim-tree.lua",
+        },
+        config = function()
+            local sb = require("springboot-nvim")
+	    mapn('<leader>Jr', sb.boot_run, "Spring Boot Run Project")
+	    mapn('<leader>Jc', sb.generate_class, "Java Create Class")
+	    mapn('<leader>Ji', sb.generate_interface, "Java Create Interface")
+	    mapn('<leader>Je', sb.generate_enum, "Java Create Enum")
+            sb.setup({})
         end
     },
 
