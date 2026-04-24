@@ -2,7 +2,6 @@
 vim.wo.number           = true
 vim.wo.relativenumber   = true
 
-
 local opt               = vim.opt
 
 opt.clipboard           = "unnamedplus"
@@ -13,6 +12,7 @@ opt.softtabstop         = 4
 opt.wrap                = false
 opt.guicursor           = "n-v-i-c:block-Cursor"
 opt.laststatus          = 3
+opt.signcolumn          = "no"
 
 vim.g.mapleader         = " "
 vim.g.maplocalleader    = "\\"
@@ -24,9 +24,8 @@ end
 local function mapn(from, to, desc) map('n', from, to, desc) end
 
 mapn('<C-a>', '<C-y>', "Scroll down")
-mapn('<C-k>', ':Explore .<CR>', "Open file explorer")
-mapn('<C-b>', function() require("zen-mode").toggle() end, "Open Zen Mode")
-mapn('<C-s>', ':wqall<CR>', "Open Zen Mode")
+mapn('<C-k>', function() require("oil").open() end, "Open file explorer")
+mapn('<C-s>', ':wqall<CR>', "Close from Zen Mode")
 
 vim.api.nvim_create_user_command("ZenToggle", function()
   require("zen-mode").toggle()
@@ -92,9 +91,9 @@ require("lazy").setup {
         end
     },
     {
-        "folke/todo-comments.nvim", event = "VimEnter", 
-        dependencies = { "nvim-lua/plenary.nvim" }, 
-        opts = { signs = false } 
+        "folke/todo-comments.nvim", event = "VimEnter",
+        dependencies = { "nvim-lua/plenary.nvim" },
+        opts = { signs = false }
     },
     {
         "nvim-telescope/telescope.nvim", version = "*",
@@ -112,9 +111,123 @@ require("lazy").setup {
         end
     },
     {
+        "stevearc/oil.nvim",
+        config = function()
+            require("oil").setup({
+                default_file_explorer = true,
+                columns = {
+                    "icon",
+                },
+                keymaps = {
+                    ["<CR>"] = "actions.select",
+                    ["-"] = "actions.parent",
+                    ["g?"] = "actions.show_help",
+                    ["<C-s>"] = false,
+                },
+                view_options = {
+                    show_hidden = true,
+                },
+            })
+
+            vim.api.nvim_create_autocmd("FileType", {
+                pattern = "oil_preview",
+                callback = function(event)
+                    vim.keymap.set("n", "<CR>", function()
+                        vim.api.nvim_input("y")
+                    end, { buffer = event.buf, silent = true, nowait = true, desc = "Confirm oil changes" })
+                end,
+            })
+        end,
+    },
+    {
+        "saghen/blink.cmp",
+        version = "1.*",
+        opts = {
+            keymap = {
+                preset = "default",
+                ["<Tab>"] = {
+                    function(cmp)
+                        if cmp.snippet_active() then
+                            return cmp.accept()
+                        end
+                        return cmp.select_and_accept()
+                    end,
+                    "snippet_forward",
+                    "fallback",
+                },
+                ["<C-f>"] = { "select_and_accept", "fallback" },
+            },
+            sources = {
+                default = { "lsp", "path", "snippets", "buffer" },
+            },
+        },
+        opts_extend = { "sources.default" },
+    },
+    {
         "neovim/nvim-lspconfig",
         config = function()
-            vim.lsp.enable({ "clangd", "python-lsp-server", "ruff", "basedpyright", "lua-language-server" })
+            vim.api.nvim_create_autocmd("LspAttach", {
+                callback = function(event)
+                    local opts = { buffer = event.buf }
+
+                    vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, vim.tbl_extend("force", opts, {
+                        desc = "Show line diagnostic",
+                    }))
+
+                    vim.keymap.set("n", "]d", function()
+                        vim.diagnostic.jump({ count = 1, float = true })
+                    end, vim.tbl_extend("force", opts, {
+                        desc = "Next diagnostic",
+                    }))
+
+                    vim.keymap.set("n", "[d", function()
+                        vim.diagnostic.jump({ count = -1, float = true })
+                    end, vim.tbl_extend("force", opts, {
+                        desc = "Previous diagnostic",
+                    }))
+
+                    vim.keymap.set("n", "K", vim.lsp.buf.hover, vim.tbl_extend("force", opts, {
+                        desc = "LSP hover",
+                    }))
+
+                    vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, vim.tbl_extend("force", opts, {
+                        desc = "Code action",
+                    }))
+
+                    vim.keymap.set("n", "<leader>A", function()
+                        vim.lsp.buf.code_action({ apply = true })
+                    end, vim.tbl_extend("force", opts, {
+                        desc = "Apply code action",
+                    }))
+
+                    vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, vim.tbl_extend("force", opts, {
+                        desc = "Rename symbol",
+                    }))
+
+                    vim.keymap.set("n", "gd", vim.lsp.buf.definition, vim.tbl_extend("force", opts, {
+                        desc = "Go to definition",
+                    }))
+                end,
+            })
+
+            local capabilities = vim.lsp.protocol.make_client_capabilities()
+            capabilities.workspace.didChangeWatchedFiles.dynamicRegistration = false
+            capabilities = require("blink.cmp").get_lsp_capabilities(capabilities)
+
+            vim.lsp.config("*", {
+                capabilities = capabilities,
+            })
+            vim.lsp.enable({ "clangd", "ruff", "basedpyright", "lua_ls" })
+            vim.lsp.config("lua_ls", {
+                settings = {
+                    Lua = {
+                        diagnostics = {
+                            globals = { "vim" }
+                        }
+                    }
+                }
+            })
+
         end
     },
     {
@@ -122,7 +235,10 @@ require("lazy").setup {
         lazy = false,
         build = ":TSUpdate",
         config = function()
-            require('nvim-treesitter').install({ 'c', 'python' }):wait(300000)
+            require('nvim-treesitter').setup({
+                ensure_installed={"c", "python", "lua"},
+                highlight={enable=true},
+            })
         end
     },
 
@@ -193,6 +309,7 @@ mapn('<leader>td', function()
     local nline = require("noirbuddy.plugins.lualine")
     setup_lualine(nline.theme)
 end, "Toggle light mode")
+mapn('<leader>tz', function() require("zen-mode").toggle() end, "Toggle Zen Mode")
 
 -- --------------------------------------- end: lazy ---------------------------------------
 
@@ -235,4 +352,3 @@ vim.keymap.set("v", "<leader>ob", open_visual_selection_in_browser, {
   desc = "Open selection in browser",
 })
 -- --------------------------------------- end: open in browser ---------------------------------------
-
