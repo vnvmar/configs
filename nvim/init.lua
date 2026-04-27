@@ -17,6 +17,44 @@ opt.signcolumn          = "no"
 vim.g.mapleader         = " "
 vim.g.maplocalleader    = "\\"
 
+local function fillchars_with_pipe_split_separator(fillchars)
+    local result      = {}
+    local found_vert  = false
+
+    for item in fillchars:gmatch("[^,]+") do
+        if item:match("^vert:") then
+            item       = "vert:│"
+            found_vert = true
+        end
+        table.insert(result, item)
+    end
+
+    if not found_vert then
+        table.insert(result, "vert:│")
+    end
+
+    return table.concat(result, ",")
+end
+
+local function use_pipe_split_separator()
+    vim.o.fillchars = fillchars_with_pipe_split_separator(vim.o.fillchars)
+
+    for _, win in ipairs(vim.api.nvim_list_wins()) do
+        local ok, fillchars = pcall(vim.api.nvim_get_option_value, "fillchars", { win = win })
+        if ok then
+            pcall(
+                vim.api.nvim_set_option_value,
+                "fillchars",
+                fillchars_with_pipe_split_separator(fillchars),
+                { win = win }
+            )
+        end
+    end
+end
+
+use_pipe_split_separator()
+
+
 local function map(mode, from, to, desc)
     vim.keymap.set(mode, from, to, { desc = desc })
 end
@@ -101,26 +139,17 @@ require("lazy").setup {
         opts = { signs = false }
     },
     {
-        "nvim-telescope/telescope.nvim",
-        cmd = "Telescope",
+        "ibhagwan/fzf-lua",
+        dependencies = { "nvim-tree/nvim-web-devicons" },
         keys = {
-            { "<leader>ff", "<cmd>Telescope find_files<cr>", desc = "[Telescope] find files" },
-            { "<leader>fg", "<cmd>Telescope live_grep<cr>", desc = "[Telescope] live grep" },
-            { "<leader>fo", "<cmd>Telescope lsp_type_definitions<cr>", desc = "[Telescope] type definitions" },
-            { "<leader>fd", "<cmd>Telescope diagnostics<cr>", desc = "[Telescope] diagnostics" },
+            { "<leader>ff", function() require("fzf-lua").files() end, desc = "[fzf] find files" },
+            { "<leader>fg", function() require("fzf-lua").live_grep_native() end, desc = "[fzf] live grep" },
+            { "<leader>fo", function() require("fzf-lua").lsp_typedefs() end, desc = "[fzf] type definitions" },
+            { "<leader>fd", function() require("fzf-lua").diagnostics_document() end, desc = "[fzf] diagnostics" },
+            { "<leader>fs", function() require("fzf-lua").lsp_document_symbols() end, desc = "[fzf] document symbols" },
+            { "<leader>fS", function() require("fzf-lua").lsp_document_symbols({ regex_filter = "Function" }) end, desc = "[fzf] document functions" },
         },
-        dependencies = {
-            "nvim-lua/plenary.nvim",
-            { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
-        },
-        config = function()
-            require("telescope").setup({
-                extensions = {
-                    fzf = {},
-                },
-            })
-            pcall(require("telescope").load_extension, "fzf")
-        end,
+        opts = {},
     },
     {
         "stevearc/oil.nvim",
@@ -268,6 +297,38 @@ require("lazy").setup {
 	    mapn('<leader>Je', sb.generate_enum, "Java Create Enum")
             sb.setup({})
         end
+    },
+
+    {
+        "hedyhli/outline.nvim",
+        cmd = { "Outline", "OutlineOpen" },
+        keys = {
+            { "<leader>to", "<cmd>Outline<cr>", desc = "Toggle outline" },
+        },
+        opts = {
+            providers = {
+                priority = { "lsp", "markdown", "norg", "man" },
+                markdown = {
+                    filetypes = { "markdown" },
+                },
+            },
+            symbol_folding = {
+                autofold_depth = 1,
+                auto_unfold = {
+                    hovered = true,
+                    only = true,
+                },
+            },
+        },
+    },
+
+    {
+        "kdheepak/lazygit.nvim",
+        cmd = "LazyGit",
+        dependencies = { "nvim-lua/plenary.nvim" },
+        keys = {
+            { "<leader>gg", "<cmd>LazyGit<cr>", desc = "LazyGit" },
+        },
     },
 
     -- THEMES
