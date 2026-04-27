@@ -7,6 +7,17 @@
 // custom settings, run the `open default settings` command
 // from the command palette or from `Zed` application menu.
 {
+  "agent_servers": {
+    "codex-acp": {
+      "type": "registry"
+    }
+  },
+  "outline_panel": {
+    "dock": "left"
+  },
+  "collaboration_panel": {
+    "dock": "left"
+  },
   "icon_theme": {
     "mode": "light",
     "light": "Zed (Default)",
@@ -19,6 +30,7 @@
     "enabled": true
   },
   "git_panel": {
+    "dock": "left",
     "tree_view": false
   },
   "use_system_window_tabs": true,
@@ -61,6 +73,7 @@
     "button": false
   },
   "agent": {
+    "dock": "right",
     "tool_permissions": {
       "default": "allow"
     },
@@ -74,8 +87,8 @@
       }
     },
     "inline_assistant_model": {
-      "provider": "ollama",
-      "model": "deepseek-r1:8b"
+      "provider": "anthropic",
+      "model": "claude-haiku-4-5-latest"
     },
     "model_parameters": [],
     "default_model": {
