@@ -4,3 +4,6 @@ zed/prompts/*
 gh/hosts.yaml
 raycast
 
+gh/hosts.yml
+nvim/lazy-lock.json
+zed/prompts
