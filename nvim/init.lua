@@ -198,7 +198,7 @@ require("lazy").setup {
                         desc = "Previous diagnostic",
                     }))
 
-                    vim.keymap.set("n", "K", vim.lsp.buf.hover, vim.tbl_extend("force", opts, {
+                    vim.keymap.set("n", "<A-k>", vim.lsp.buf.hover, vim.tbl_extend("force", opts, {
                         desc = "LSP hover",
                     }))
 
