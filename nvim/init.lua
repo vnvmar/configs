@@ -14,6 +14,49 @@ opt.guicursor           = "n-v-i-c:block-Cursor"
 opt.laststatus          = 3
 opt.signcolumn          = "no"
 
+local function fillchars_with_pipe_split_separator(fillchars)
+    local result      = {}
+    local found_vert  = false
+
+    for item in fillchars:gmatch("[^,]+") do
+        if item:match("^vert:") then
+            item       = "vert:│"
+            found_vert = true
+        end
+        table.insert(result, item)
+    end
+
+    if not found_vert then
+        table.insert(result, "vert:│")
+    end
+
+    return table.concat(result, ",")
+end
+
+local function use_pipe_split_separator()
+    vim.o.fillchars = fillchars_with_pipe_split_separator(vim.o.fillchars)
+
+    for _, win in ipairs(vim.api.nvim_list_wins()) do
+        local ok, fillchars = pcall(vim.api.nvim_get_option_value, "fillchars", { win = win })
+        if ok then
+            pcall(
+                vim.api.nvim_set_option_value,
+                "fillchars",
+                fillchars_with_pipe_split_separator(fillchars),
+                { win = win }
+            )
+        end
+    end
+end
+
+use_pipe_split_separator()
+
+vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter", "WinNew" }, {
+    callback = function()
+        vim.schedule(use_pipe_split_separator)
+    end,
+})
+
 vim.g.mapleader         = " "
 vim.g.maplocalleader    = "\\"
 
@@ -27,9 +70,31 @@ mapn('<C-a>', '<C-y>', "Scroll down")
 mapn('<C-k>', function() require("oil").open() end, "Open file explorer")
 mapn('<C-s>', ':wqall<CR>', "Close from Zen Mode")
 
-vim.api.nvim_create_user_command("ZenToggle", function()
-  require("zen-mode").toggle()
-end, {})
+local function toggle_zen_mode()
+    zen_mode = require("zen-mode")
+    zen_mode.setup({
+        window = {
+            backdrop = 0.95,
+            width    = 0.50,
+            height   = 1,
+            options  = {
+                signcolumn     = "no",
+                number         = false, -- disable number column
+                relativenumber = false, -- disable relative numbers
+                cursorline     = false, -- disable cursorline
+                cursorcolumn   = false, -- disable cursor column
+                foldcolumn     = "0", -- disable fold column
+                list           = false, -- disable whitespace characters
+            },
+        },
+        on_open = function()
+            use_pipe_split_separator()
+        end,
+    })
+    zen_mode.toggle()
+end
+
+vim.api.nvim_create_user_command("ZenToggle", toggle_zen_mode, {})
 
 vim.api.nvim_create_user_command("Q", "qall", {})
 vim.api.nvim_create_user_command("W", "wqa", {})
@@ -246,16 +311,23 @@ require("lazy").setup {
     {
         "folke/zen-mode.nvim",
         opts = {
-            backdrop        = 0.95,
-            width           = 0.85,
-            height          = 1,
-            -- signcolumn   = "no", -- disable signcolumn
-            number          = false, -- disable number column
-            relativenumber  = false, -- disable relative numbers
-          -- cursorline = false, -- disable cursorline
-          -- cursorcolumn = false, -- disable cursor column
-          -- foldcolumn = "0", -- disable fold column
-          -- list = false, -- disable whitespace characters
+            window = {
+                backdrop = 0.95,
+                width    = 0.85,
+                height   = 1,
+                options  = {
+                    signcolumn     = "no",
+                    number         = false, -- disable number column
+                    relativenumber = false, -- disable relative numbers
+                  -- cursorline = false, -- disable cursorline
+                  -- cursorcolumn = false, -- disable cursor column
+                    foldcolumn     = "0", -- disable fold column
+                  -- list = false, -- disable whitespace characters
+                },
+            },
+            on_open = function()
+                use_pipe_split_separator()
+            end,
         },
     },
     {
@@ -309,7 +381,7 @@ mapn('<leader>td', function()
     local nline = require("noirbuddy.plugins.lualine")
     setup_lualine(nline.theme)
 end, "Toggle light mode")
-mapn('<leader>tz', function() require("zen-mode").toggle() end, "Toggle Zen Mode")
+mapn('<leader>tz', toggle_zen_mode, "Toggle Zen Mode")
 
 -- --------------------------------------- end: lazy ---------------------------------------
 

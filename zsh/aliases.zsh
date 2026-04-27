@@ -33,6 +33,14 @@ alias vi='nvim +ZenToggle'
 alias vv='nvim -c "Explore . " -c "term"'
 alias vh='nvim -c "Explore . " -c "vertical botright split | term"'
 
+alias zn='zed -n .'
+
+# ------------- CONVENIENCE ALIASES -------------
+
+alias uvs='uv sync && source .venv/bin/activate'
+alias uvc='uv cache clean && rm -rf .venv'
+alias uvcs='uv cache clean && rm -rf .venv && uv sync && source .venv/bin/acviate'
+
 # ------------- SUFFIX ALIASES -------------
 
 alias -s json='jless'

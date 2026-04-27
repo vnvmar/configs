@@ -23,7 +23,8 @@ alias gpo="git push origin"
 # ------------------- end: pushing -------------------
 
 # ------------------- beg: pulling -------------------
-alias gl="git pull --no-rebase"
+alias gl="git pull"
+alias glr="git pull --rebase"
 # ------------------- end: pulling -------------------
 
 # ------------------- beg: log -------------------
@@ -52,7 +53,7 @@ alias grs="git restore --staged"
 
 gwtam()
 {
-    git worktree add "$1" && cd "$1" && git pull
+    git worktree add "$1" && cd "$1" && git pull origin "$1"
 }
 
 gwtrm()
