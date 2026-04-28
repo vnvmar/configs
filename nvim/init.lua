@@ -14,9 +14,6 @@ opt.guicursor           = "n-v-i-c:block-Cursor"
 opt.laststatus          = 3
 opt.signcolumn          = "no"
 
-vim.g.mapleader         = " "
-vim.g.maplocalleader    = "\\"
-
 local function fillchars_with_pipe_split_separator(fillchars)
     local result      = {}
     local found_vert  = false
@@ -54,25 +51,50 @@ end
 
 use_pipe_split_separator()
 
+vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter", "WinNew" }, {
+    callback = function()
+        vim.schedule(use_pipe_split_separator)
+    end,
+})
+
+vim.g.mapleader         = " "
+vim.g.maplocalleader    = "\\"
 
 local function map(mode, from, to, desc)
     vim.keymap.set(mode, from, to, { desc = desc })
 end
 
 local function mapn(from, to, desc) map('n', from, to, desc) end
-local function mapt(from, to, desc) map('t', form, to, desc) end
 
 mapn('<C-a>', '<C-y>', "Scroll down")
 mapn('<C-k>', function() require("oil").open() end, "Open file explorer")
 mapn('<C-s>', ':wqall<CR>', "Close from Zen Mode")
 
-vim.keymap.set('t', '<Esc>', [[<C-\><C-n>]], { noremap = true, silent = true })
+local function toggle_zen_mode()
+    zen_mode = require("zen-mode")
+    zen_mode.setup({
+        window = {
+            backdrop = 0.95,
+            width    = 0.50,
+            height   = 1,
+            options  = {
+                signcolumn     = "no",
+                number         = false, -- disable number column
+                relativenumber = false, -- disable relative numbers
+                cursorline     = false, -- disable cursorline
+                cursorcolumn   = false, -- disable cursor column
+                foldcolumn     = "0", -- disable fold column
+                list           = false, -- disable whitespace characters
+            },
+        },
+        on_open = function()
+            use_pipe_split_separator()
+        end,
+    })
+    zen_mode.toggle()
+end
 
-mapn('<leader>tz', function() require("zen-mode").toggle() end, "Toggle Zen Mode")
-
-vim.api.nvim_create_user_command("ZenToggle", function()
-  require("zen-mode").toggle()
-end, {})
+vim.api.nvim_create_user_command("ZenToggle", toggle_zen_mode, {})
 
 vim.api.nvim_create_user_command("Q", "qall", {})
 vim.api.nvim_create_user_command("W", "wqa", {})
@@ -139,17 +161,19 @@ require("lazy").setup {
         opts = { signs = false }
     },
     {
-        "ibhagwan/fzf-lua",
-        dependencies = { "nvim-tree/nvim-web-devicons" },
-        keys = {
-            { "<leader>ff", function() require("fzf-lua").files() end, desc = "[fzf] find files" },
-            { "<leader>fg", function() require("fzf-lua").live_grep_native() end, desc = "[fzf] live grep" },
-            { "<leader>fo", function() require("fzf-lua").lsp_typedefs() end, desc = "[fzf] type definitions" },
-            { "<leader>fd", function() require("fzf-lua").diagnostics_document() end, desc = "[fzf] diagnostics" },
-            { "<leader>fs", function() require("fzf-lua").lsp_document_symbols() end, desc = "[fzf] document symbols" },
-            { "<leader>fS", function() require("fzf-lua").lsp_document_symbols({ regex_filter = "Function" }) end, desc = "[fzf] document functions" },
+        "nvim-telescope/telescope.nvim", version = "*",
+        dependencies = {
+            "nvim-lua/plenary.nvim",
+            { "nvim-telescope/telescope-fzf-native.nvim", build = "make" }
         },
-        opts = {},
+        config = function()
+            local bi = require("telescope.builtin")
+
+            mapn("<leader>ff", bi.find_files, "[Telescope] find files")
+            mapn("<leader>fg", bi.live_grep, "[Telesceop] live grep")
+            mapn("<leader>fo", bi.lsp_type_definitions, "[Telescope] type definitions")
+            mapn("<leader>fd", bi.diagnostics, "[Telescope] diagnostics")
+        end
     },
     {
         "stevearc/oil.nvim",
@@ -227,7 +251,7 @@ require("lazy").setup {
                         desc = "Previous diagnostic",
                     }))
 
-                    vim.keymap.set("n", "<A-k>", vim.lsp.buf.hover, vim.tbl_extend("force", opts, {
+                    vim.keymap.set("n", "K", vim.lsp.buf.hover, vim.tbl_extend("force", opts, {
                         desc = "LSP hover",
                     }))
 
@@ -282,69 +306,28 @@ require("lazy").setup {
             })
         end
     },
-    {
-        "elmcgill/springboot-nvim",
-        dependencies = {
-            "neovim/nvim-lspconfig",
-            "mfussenegger/nvim-jdtls",
-            "nvim-tree/nvim-tree.lua",
-        },
-        config = function()
-            local sb = require("springboot-nvim")
-	    mapn('<leader>Jr', sb.boot_run, "Spring Boot Run Project")
-	    mapn('<leader>Jc', sb.generate_class, "Java Create Class")
-	    mapn('<leader>Ji', sb.generate_interface, "Java Create Interface")
-	    mapn('<leader>Je', sb.generate_enum, "Java Create Enum")
-            sb.setup({})
-        end
-    },
-
-    {
-        "hedyhli/outline.nvim",
-        cmd = { "Outline", "OutlineOpen" },
-        keys = {
-            { "<leader>to", "<cmd>Outline<cr>", desc = "Toggle outline" },
-        },
-        opts = {
-            providers = {
-                priority = { "lsp", "markdown", "norg", "man" },
-                markdown = {
-                    filetypes = { "markdown" },
-                },
-            },
-            symbol_folding = {
-                autofold_depth = 1,
-                auto_unfold = {
-                    hovered = true,
-                    only = true,
-                },
-            },
-        },
-    },
-
-    {
-        "kdheepak/lazygit.nvim",
-        cmd = "LazyGit",
-        dependencies = { "nvim-lua/plenary.nvim" },
-        keys = {
-            { "<leader>gg", "<cmd>LazyGit<cr>", desc = "LazyGit" },
-        },
-    },
 
     -- THEMES
     {
         "folke/zen-mode.nvim",
         opts = {
-            backdrop        = 0.95,
-            width           = 0.85,
-            height          = 1,
-            -- signcolumn   = "no", -- disable signcolumn
-            number          = false, -- disable number column
-            relativenumber  = false, -- disable relative numbers
-          -- cursorline = false, -- disable cursorline
-          -- cursorcolumn = false, -- disable cursor column
-          -- foldcolumn = "0", -- disable fold column
-          -- list = false, -- disable whitespace characters
+            window = {
+                backdrop = 0.95,
+                width    = 0.85,
+                height   = 1,
+                options  = {
+                    signcolumn     = "no",
+                    number         = false, -- disable number column
+                    relativenumber = false, -- disable relative numbers
+                  -- cursorline = false, -- disable cursorline
+                  -- cursorcolumn = false, -- disable cursor column
+                    foldcolumn     = "0", -- disable fold column
+                  -- list = false, -- disable whitespace characters
+                },
+            },
+            on_open = function()
+                use_pipe_split_separator()
+            end,
         },
     },
     {
@@ -398,7 +381,7 @@ mapn('<leader>td', function()
     local nline = require("noirbuddy.plugins.lualine")
     setup_lualine(nline.theme)
 end, "Toggle light mode")
-mapn('<leader>tz', function() require("zen-mode").toggle() end, "Toggle Zen Mode")
+mapn('<leader>tz', toggle_zen_mode, "Toggle Zen Mode")
 
 -- --------------------------------------- end: lazy ---------------------------------------
 
