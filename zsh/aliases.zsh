@@ -22,6 +22,7 @@ alias ff='cdfzf ~/'
 alias F='cdfzf'
 alias f='cfzf'
 alias d='dirs -v'
+alias c='clear && clear'
 for index ({1..9}) alias "$index"="cd +${index}"; unset index
 
 alias v='nvim +ZenToggle .'
@@ -29,6 +30,10 @@ alias vs='nvim $(fzf) -c ":ZenMode"'
 alias vi='nvim +ZenToggle'
 alias vv='nvim -c "Explore . " -c "term"'
 alias vh='nvim -c "Explore . " -c "vertical botright split | term"'
+
+alias uvc='uv cache clean && rm -rf .venv && rm uv.lock'
+alias uvs='uv sync && source .venv/bin/activate'
+alias uvcs='uv cache clean && rm -rf .venv && rm uv.lock && uv sync && source .venv/bin/activate'
 
 # ------------- SUFFIX ALIASES -------------
 
