@@ -40,7 +40,7 @@ alias zn='zed -n .'
 
 alias uvs='uv sync && source .venv/bin/activate'
 alias uvc='uv cache clean && rm -rf .venv && rm uv.lock'
-alias uvcs='uv cache clean && rm -rf .venv && rm uv.lock && uv sync && source .venv/bin/acviate'
+alias uvcs='uv cache clean && rm -rf .venv && rm uv.lock && uv sync && source .venv/bin/activate'
 
 # ------------- SUFFIX ALIASES -------------
 

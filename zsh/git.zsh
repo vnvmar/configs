@@ -4,6 +4,7 @@
 # ------------------- REFERENCE -------------------
 
 alias gis="git status"
+alias cis="clear && clear && git status"
 
 # ------------------- beg: stagin -------------------
 alias ga="git add"
@@ -30,12 +31,14 @@ alias glr="git pull --rebase"
 # ------------------- beg: log -------------------
 alias glo="git log --pretty='oneline'"
 alias glog="git log --graph --oneline --decorate"
+alias clog="clear && clear && git log --graph --oneline --decorate"
 # ------------------- end: log -------------------
 
 # ------------------- beg: checking out & branches -------------------
 alias gco="git checkout"
 alias gcb="git checkout -b"
 alias gb="git branch"
+alias gbc="git rev-parse --abbrev-ref HEAD"
 alias gsw="git switch"
 alias gswh="git switch -"
 # ------------------- end: checking out & branches -------------------
@@ -43,17 +46,28 @@ alias gswh="git switch -"
 # ------------------- beg: diffs -------------------
 alias gd="git diff"
 alias gda="git diff --apply"
+alias gdaw="git apply --whitespace=fix"
+gdla() 
+{
+    git add --intent-to-add --all && git diff && git reset >/dev/null
+}
+gdl() 
+{
+    git add --intent-to-add "$@" && git diff "$@" && git reset "$@" >/dev/null
+}
 # ------------------- end: diffs -------------------
 
 # ------------------- beg: restore -------------------
 alias gr="git restore"
-alias grs="git restore --staged"
+alias grs="git restore --staged ."
+alias gra="git clean -d -f && git restore ."
+alias gru="git clean -d -f"
 # ------------------- end: restore -------------------
 
 
 gwtam()
 {
-    git worktree add "$1" && cd "$1" && git pull origin "$1"
+    git worktree add "$1" && cd "$1" && git pull
 }
 
 gwtrm()
