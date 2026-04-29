@@ -65,6 +65,9 @@ local function map(mode, from, to, desc)
 end
 
 local function mapn(from, to, desc) map('n', from, to, desc) end
+local function mapt(from, to, desc) map('t', from, to, desc) end
+
+mapt('<Esc>', '<C-\\><C-n>', "Exit terminal mode")
 
 mapn('<C-a>', '<C-y>', "Scroll down")
 mapn('<C-k>', function() require("oil").open() end, "Open file explorer")
@@ -75,12 +78,12 @@ local function toggle_zen_mode()
     zen_mode.setup({
         window = {
             backdrop = 0.95,
-            width    = 0.50,
+            width    = 0.60,
             height   = 1,
             options  = {
                 signcolumn     = "no",
-                number         = false, -- disable number column
-                relativenumber = false, -- disable relative numbers
+                number         = true, -- disable number column
+                relativenumber = true, -- disable relative numbers
                 cursorline     = false, -- disable cursorline
                 cursorcolumn   = false, -- disable cursor column
                 foldcolumn     = "0", -- disable fold column
@@ -161,19 +164,17 @@ require("lazy").setup {
         opts = { signs = false }
     },
     {
-        "nvim-telescope/telescope.nvim", version = "*",
-        dependencies = {
-            "nvim-lua/plenary.nvim",
-            { "nvim-telescope/telescope-fzf-native.nvim", build = "make" }
+        "ibhagwan/fzf-lua",
+        dependencies = { "nvim-tree/nvim-web-devicons" },
+        keys = {
+            { "<leader>ff", function() require("fzf-lua").files() end, desc = "[fzf] find files" },
+            { "<leader>fg", function() require("fzf-lua").live_grep_native() end, desc = "[fzf] live grep" },
+            { "<leader>fo", function() require("fzf-lua").lsp_typedefs() end, desc = "[fzf] type definitions" },
+            { "<leader>fd", function() require("fzf-lua").diagnostics_document() end, desc = "[fzf] diagnostics" },
+            { "<leader>fs", function() require("fzf-lua").lsp_document_symbols() end, desc = "[fzf] document symbols" },
+            { "<leader>fS", function() require("fzf-lua").lsp_document_symbols({ regex_filter = "Function" }) end, desc = "[fzf] document functions" },
         },
-        config = function()
-            local bi = require("telescope.builtin")
-
-            mapn("<leader>ff", bi.find_files, "[Telescope] find files")
-            mapn("<leader>fg", bi.live_grep, "[Telesceop] live grep")
-            mapn("<leader>fo", bi.lsp_type_definitions, "[Telescope] type definitions")
-            mapn("<leader>fd", bi.diagnostics, "[Telescope] diagnostics")
-        end
+        opts = {},
     },
     {
         "stevearc/oil.nvim",
@@ -383,6 +384,19 @@ mapn('<leader>td', function()
 end, "Toggle light mode")
 mapn('<leader>tz', toggle_zen_mode, "Toggle Zen Mode")
 
+local function open_terminal(direction)
+    local cmds = { r = "rightbelow vsplit", l = "leftabove vsplit", u = "leftabove split", d = "rightbelow split" }
+    local focus = { r = "wincmd l", l = "wincmd h", u = "wincmd k", d = "wincmd j" }
+    vim.cmd(cmds[direction])
+    vim.cmd(focus[direction])
+    vim.cmd("terminal")
+    vim.cmd("startinsert")
+end
+mapn('<leader>ttr', function() open_terminal('r') end, "Open terminal pane right")
+mapn('<leader>ttl', function() open_terminal('l') end, "Open terminal pane left")
+mapn('<leader>ttu', function() open_terminal('u') end, "Open terminal pane up")
+mapn('<leader>ttd', function() open_terminal('d') end, "Open terminal pane down")
+
 -- --------------------------------------- end: lazy ---------------------------------------
 
 -- --------------------------------------- beg: open in browser ---------------------------------------
@@ -420,7 +434,30 @@ local function open_visual_selection_in_browser()
   open_in_browser(text)
 end
 
-vim.keymap.set("v", "<leader>ob", open_visual_selection_in_browser, {
+vim.keymap.set("v", "<leader>fb", open_visual_selection_in_browser, {
   desc = "Open selection in browser",
 })
+
+vim.keymap.set({ 'n', 't' }, '<leader>fe', function()
+    local word = vim.fn.expand("<cfile>")
+    if word == "" then word = vim.fn.expand("<cWORD>") end
+    if word == "" then return end
+    local path = word:gsub("^file://", "")
+    vim.cmd("edit " .. vim.fn.fnameescape(path))
+end, { desc = "Open file URI in neovim" })
+
+vim.keymap.set({ 'n', 't' }, '<leader>fa', function()
+    local word = vim.fn.expand("<cfile>")
+    if word == "" then word = vim.fn.expand("<cWORD>") end
+    if word == "" then return end
+    local path = word:gsub("^file://", "")
+    require("fzf-lua").files({ cwd = vim.fn.fnamemodify(path, ":h"), query = vim.fn.fnamemodify(path, ":t") })
+    -- if vim.fn.isdirectory(path) == 1 then
+    --     require("fzf-lua").files({ cwd = path })
+    -- elseif vim.fn.filereadable(path) == 1 then
+    --     require("fzf-lua").files({ cwd = vim.fn.fnamemodify(path, ":h"), query = vim.fn.fnamemodify(path, ":t") })
+    -- else
+    --     open_in_browser(word)
+    -- end
+end, { desc = "Open file URI via fzf-lua (or URL in browser)" })
 -- --------------------------------------- end: open in browser ---------------------------------------

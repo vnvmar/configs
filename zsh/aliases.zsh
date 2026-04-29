@@ -23,6 +23,8 @@ alias F='cdfzf'
 alias f='cfzf'
 alias d='dirs -v'
 alias c='clear && clear'
+alias k='clear && clear && cd'
+alias clip='xclip -selection clipboard'
 for index ({1..9}) alias "$index"="cd +${index}"; unset index
 
 alias v='nvim +ZenToggle .'
