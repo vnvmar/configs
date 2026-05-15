@@ -16,6 +16,7 @@ alias .....='cd ../../../..'
 
 # ------------- GENERAL -------------
 
+alias z='zellij'
 alias l='eza -la'
 alias e='exit'
 alias ff='cdfzf ~/'
@@ -24,6 +25,7 @@ alias f='cfzf'
 alias d='dirs -v'
 alias c='clear && clear'
 alias k='clear && clear && cd'
+alias kl='clear && clear && cd && eza -la'
 alias clip='xclip -selection clipboard'
 for index ({1..9}) alias "$index"="cd +${index}"; unset index
 

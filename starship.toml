@@ -15,7 +15,9 @@ truncation_symbol   = " -"
 
 [git_branch]
 style               = "pink"
-format              = "[$branch]($style)"
+format              = "[$branch(:$remote_branch)]($style)"
+truncation_length   = 24
+truncation_symbol   = "…"
 
 [palettes.primary]
 blue = "#98BED3"
