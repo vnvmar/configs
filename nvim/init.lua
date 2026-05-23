@@ -65,6 +65,9 @@ local function map(mode, from, to, desc)
 end
 
 local function mapn(from, to, desc) map('n', from, to, desc) end
+local function mapt(from, to, desc) map('t', from, to, desc) end
+
+mapt('<Esc>', '<C-\\><C-n>', "Exit terminal mode")
 
 mapn('<C-a>', '<C-y>', "Scroll down")
 mapn('<C-k>', function() require("oil").open() end, "Open file explorer")
@@ -75,12 +78,12 @@ local function toggle_zen_mode()
     zen_mode.setup({
         window = {
             backdrop = 0.95,
-            width    = 0.50,
+            width    = 0.60,
             height   = 1,
             options  = {
                 signcolumn     = "no",
-                number         = false, -- disable number column
-                relativenumber = false, -- disable relative numbers
+                number         = true, -- disable number column
+                relativenumber = true, -- disable relative numbers
                 cursorline     = false, -- disable cursorline
                 cursorcolumn   = false, -- disable cursor column
                 foldcolumn     = "0", -- disable fold column
@@ -152,6 +155,7 @@ require("lazy").setup {
             require("which-key").add {
                 { "<leader>c", group = "[C]ode" },
                 { "<leader>s", group = "[S]earch" },
+                { "<leader>g", group = "[G]it" },
             }
         end
     },
@@ -161,19 +165,36 @@ require("lazy").setup {
         opts = { signs = false }
     },
     {
-        "nvim-telescope/telescope.nvim", version = "*",
-        dependencies = {
-            "nvim-lua/plenary.nvim",
-            { "nvim-telescope/telescope-fzf-native.nvim", build = "make" }
+        "ibhagwan/fzf-lua",
+        dependencies = { "nvim-tree/nvim-web-devicons" },
+        keys = {
+            { "<leader>ff", function() require("fzf-lua").files() end, desc = "[fzf] find files" },
+            {
+                "<leader>fF",
+                function()
+                    local fzf = require("fzf-lua")
+                    local cmd = vim.fn.executable("fd") == 1
+                        and "fd --type d --hidden --exclude .git"
+                        or "find . -type d -not -path '*/.git/*'"
+                    fzf.fzf_exec(cmd, {
+                        prompt = "Directories> ",
+                        actions = {
+                            ["default"] = function(selected)
+                                if not selected or not selected[1] then return end
+                                require("oil").open(selected[1])
+                            end,
+                        },
+                    })
+                end,
+                desc = "[fzf] find directories (open in oil)",
+            },
+            { "<leader>fg", function() require("fzf-lua").live_grep_native() end, desc = "[fzf] live grep" },
+            { "<leader>fo", function() require("fzf-lua").lsp_typedefs() end, desc = "[fzf] type definitions" },
+            { "<leader>fd", function() require("fzf-lua").diagnostics_document() end, desc = "[fzf] diagnostics" },
+            { "<leader>fs", function() require("fzf-lua").lsp_document_symbols() end, desc = "[fzf] document symbols" },
+            { "<leader>fS", function() require("fzf-lua").lsp_document_symbols({ regex_filter = "Function" }) end, desc = "[fzf] document functions" },
         },
-        config = function()
-            local bi = require("telescope.builtin")
-
-            mapn("<leader>ff", bi.find_files, "[Telescope] find files")
-            mapn("<leader>fg", bi.live_grep, "[Telesceop] live grep")
-            mapn("<leader>fo", bi.lsp_type_definitions, "[Telescope] type definitions")
-            mapn("<leader>fd", bi.diagnostics, "[Telescope] diagnostics")
-        end
+        opts = {},
     },
     {
         "stevearc/oil.nvim",
@@ -282,7 +303,12 @@ require("lazy").setup {
             vim.lsp.config("*", {
                 capabilities = capabilities,
             })
-            vim.lsp.enable({ "clangd", "ruff", "basedpyright", "lua_ls" })
+            vim.lsp.config("intelephense", {
+                cmd = { "intelephense", "--stdio" },
+                filetypes = { "php" },
+                root_markers = { "composer.json", ".git" },
+            })
+            vim.lsp.enable({ "clangd", "ruff", "basedpyright", "lua_ls", "intelephense" })
             vim.lsp.config("lua_ls", {
                 settings = {
                     Lua = {
@@ -294,6 +320,10 @@ require("lazy").setup {
             })
 
         end
+    },
+    {
+        "mfussenegger/nvim-jdtls",
+        ft = { "java" },
     },
     {
         "nvim-treesitter/nvim-treesitter",
@@ -359,6 +389,171 @@ require("lazy").setup {
     },
 
     {
+        "kdheepak/lazygit.nvim",
+        dependencies = { "nvim-lua/plenary.nvim" },
+        cmd = { "LazyGit", "LazyGitCurrentFile", "LazyGitFilter", "LazyGitFilterCurrentFile" },
+        keys = {
+            { "<leader>gg", "<cmd>LazyGit<CR>", desc = "[G]it lazygit" },
+        },
+    },
+    {
+        "sindrets/diffview.nvim",
+        dependencies = { "nvim-lua/plenary.nvim" },
+        cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewToggleFiles", "DiffviewFocusFiles", "DiffviewRefresh", "DiffviewFileHistory" },
+        keys = {
+            { "<leader>gd", "<cmd>DiffviewOpen<CR>",              desc = "[G]it diff (working tree)" },
+            { "<leader>gD", "<cmd>DiffviewOpen HEAD~1<CR>",        desc = "[G]it diff (last commit)" },
+            { "<leader>gh", "<cmd>DiffviewFileHistory<CR>",        desc = "[G]it history (repo)" },
+            { "<leader>gH", "<cmd>DiffviewFileHistory %<CR>",      desc = "[G]it history (file)" },
+            { "<leader>gc", "<cmd>DiffviewClose<CR>",              desc = "[G]it close diffview" },
+            {
+                "<leader>gf",
+                function()
+                    local lib = require("diffview.lib")
+                    if lib.get_current_view() then
+                        vim.cmd("DiffviewToggleFiles")
+                    else
+                        vim.cmd("DiffviewOpen")
+                    end
+                end,
+                desc = "[G]it toggle file panel",
+            },
+            { "<leader>gr", "<cmd>DiffviewRefresh<CR>",            desc = "[G]it refresh diffview" },
+        },
+        config = function()
+            local actions = require("diffview.actions")
+            require("diffview").setup({
+                enhanced_diff_hl = true,
+                view = {
+                    default = {
+                        layout = "diff2_horizontal",
+                        disable_diagnostics = true,
+                        winbar_info = true,
+                    },
+                    merge_tool = {
+                        layout = "diff3_mixed",
+                        disable_diagnostics = true,
+                        winbar_info = true,
+                    },
+                    file_history = {
+                        layout = "diff2_horizontal",
+                        disable_diagnostics = true,
+                        winbar_info = true,
+                    },
+                },
+                keymaps = {
+                    disable_defaults = false,
+                    view = {
+                        { "n", "q",         "<cmd>DiffviewClose<CR>",        { desc = "Close diffview" } },
+                        { "n", "<C-r>",     actions.refresh_files,           { desc = "Refresh" } },
+                        { "n", "<Tab>",     actions.select_next_entry,       { desc = "Next file" } },
+                        { "n", "<S-Tab>",   actions.select_prev_entry,       { desc = "Previous file" } },
+                        { "n", "<leader>gf", actions.toggle_files,           { desc = "Toggle file panel" } },
+                        { "n", "<leader>ge", actions.focus_files,            { desc = "Focus file panel" } },
+                        { "n", "gf",        actions.goto_file_edit,          { desc = "Open file in editor" } },
+                        { "n", "<C-w>gf",   actions.goto_file_tab,           { desc = "Open file in new tab" } },
+                        { "n", "<C-w>f",    actions.goto_file_split,         { desc = "Open file in split" } },
+                        -- merge conflict keymaps (also available in diff view)
+                        { "n", "]x",        actions.next_conflict,           { desc = "Next conflict" } },
+                        { "n", "[x",        actions.prev_conflict,           { desc = "Previous conflict" } },
+                        { "n", "<leader>co", actions.conflict_choose("ours"),   { desc = "Choose OURS" } },
+                        { "n", "<leader>ct", actions.conflict_choose("theirs"), { desc = "Choose THEIRS" } },
+                        { "n", "<leader>cb", actions.conflict_choose("base"),   { desc = "Choose BASE" } },
+                        { "n", "<leader>ca", actions.conflict_choose("all"),    { desc = "Choose ALL" } },
+                        { "n", "<leader>cx", actions.conflict_choose("none"),   { desc = "Delete conflict region" } },
+                        { "n", "<leader>cO", actions.conflict_choose_all("ours"),   { desc = "Choose ALL OURS" } },
+                        { "n", "<leader>cT", actions.conflict_choose_all("theirs"), { desc = "Choose ALL THEIRS" } },
+                        { "n", "<leader>cB", actions.conflict_choose_all("base"),   { desc = "Choose ALL BASE" } },
+                        { "n", "<leader>cA", actions.conflict_choose_all("all"),    { desc = "Choose ALL (keep all)" } },
+                        { "n", "<leader>cX", actions.conflict_choose_all("none"),   { desc = "Delete ALL conflict regions" } },
+                    },
+                    diff1 = {
+                        { "n", "q", "<cmd>DiffviewClose<CR>", { desc = "Close diffview" } },
+                        { "n", "g?", actions.help({ "view", "diff1" }), { desc = "Help" } },
+                    },
+                    diff2 = {
+                        { "n", "q", "<cmd>DiffviewClose<CR>", { desc = "Close diffview" } },
+                        { "n", "g?", actions.help({ "view", "diff2" }), { desc = "Help" } },
+                    },
+                    diff3 = {
+                        { "n", "q", "<cmd>DiffviewClose<CR>", { desc = "Close diffview" } },
+                        { "n", "2do", actions.diffget("ours"),   { desc = "Get hunk from OURS" } },
+                        { "n", "3do", actions.diffget("theirs"), { desc = "Get hunk from THEIRS" } },
+                        { "n", "]x", actions.next_conflict,      { desc = "Next conflict" } },
+                        { "n", "[x", actions.prev_conflict,      { desc = "Previous conflict" } },
+                        { "n", "g?", actions.help({ "view", "diff3" }), { desc = "Help" } },
+                    },
+                    diff4 = {
+                        { "n", "q", "<cmd>DiffviewClose<CR>", { desc = "Close diffview" } },
+                        { "n", "1do", actions.diffget("base"),   { desc = "Get hunk from BASE" } },
+                        { "n", "2do", actions.diffget("ours"),   { desc = "Get hunk from OURS" } },
+                        { "n", "3do", actions.diffget("theirs"), { desc = "Get hunk from THEIRS" } },
+                        { "n", "]x", actions.next_conflict,      { desc = "Next conflict" } },
+                        { "n", "[x", actions.prev_conflict,      { desc = "Previous conflict" } },
+                        { "n", "g?", actions.help({ "view", "diff4" }), { desc = "Help" } },
+                    },
+                    file_panel = {
+                        { "n", "q",         "<cmd>DiffviewClose<CR>",        { desc = "Close diffview" } },
+                        { "n", "j",         actions.next_entry,              { desc = "Next entry" } },
+                        { "n", "k",         actions.prev_entry,              { desc = "Previous entry" } },
+                        { "n", "<Down>",    actions.next_entry,              { desc = "Next entry" } },
+                        { "n", "<Up>",      actions.prev_entry,              { desc = "Previous entry" } },
+                        { "n", "<CR>",      actions.select_entry,            { desc = "Open diff" } },
+                        { "n", "o",         actions.select_entry,            { desc = "Open diff" } },
+                        { "n", "-",         actions.toggle_stage_entry,      { desc = "Stage/unstage entry" } },
+                        { "n", "s",         actions.stage_all,               { desc = "Stage all" } },
+                        { "n", "u",         actions.unstage_all,             { desc = "Unstage all" } },
+                        { "n", "X",         actions.restore_entry,           { desc = "Restore entry (discard changes)" } },
+                        { "n", "R",         actions.refresh_files,           { desc = "Refresh file list" } },
+                        { "n", "<C-r>",     actions.refresh_files,           { desc = "Refresh file list" } },
+                        { "n", "<Tab>",     actions.select_next_entry,       { desc = "Next file diff" } },
+                        { "n", "<S-Tab>",   actions.select_prev_entry,       { desc = "Previous file diff" } },
+                        { "n", "gf",        actions.goto_file_edit,          { desc = "Open file in editor" } },
+                        { "n", "<C-w>gf",   actions.goto_file_tab,           { desc = "Open file in new tab" } },
+                        { "n", "<C-w>f",    actions.goto_file_split,         { desc = "Open file in split" } },
+                        { "n", "i",         actions.listing_style,           { desc = "Toggle list/tree layout" } },
+                        { "n", "f",         actions.toggle_flatten_dirs,     { desc = "Flatten empty dirs" } },
+                        { "n", "zR",        actions.open_all_folds,          { desc = "Expand all folds" } },
+                        { "n", "zM",        actions.close_all_folds,         { desc = "Collapse all folds" } },
+                        { "n", "zo",        actions.open_fold,               { desc = "Expand fold" } },
+                        { "n", "zc",        actions.close_fold,              { desc = "Collapse fold" } },
+                        { "n", "za",        actions.toggle_fold,             { desc = "Toggle fold" } },
+                        { "n", "<leader>gf", actions.toggle_files,           { desc = "Toggle file panel" } },
+                        { "n", "g?",        actions.help("file_panel"),      { desc = "Help" } },
+                    },
+                    file_history_panel = {
+                        { "n", "q",         "<cmd>DiffviewClose<CR>",        { desc = "Close diffview" } },
+                        { "n", "j",         actions.next_entry,              { desc = "Next entry" } },
+                        { "n", "k",         actions.prev_entry,              { desc = "Previous entry" } },
+                        { "n", "<Down>",    actions.next_entry,              { desc = "Next entry" } },
+                        { "n", "<Up>",      actions.prev_entry,              { desc = "Previous entry" } },
+                        { "n", "<CR>",      actions.select_entry,            { desc = "View commit diff" } },
+                        { "n", "o",         actions.select_entry,            { desc = "View commit diff" } },
+                        { "n", "<Tab>",     actions.select_next_entry,       { desc = "Next entry" } },
+                        { "n", "<S-Tab>",   actions.select_prev_entry,       { desc = "Previous entry" } },
+                        { "n", "gf",        actions.goto_file_edit,          { desc = "Open file in editor" } },
+                        { "n", "<C-w>gf",   actions.goto_file_tab,           { desc = "Open file in new tab" } },
+                        { "n", "<C-w>f",    actions.goto_file_split,         { desc = "Open file in split" } },
+                        { "n", "y",         actions.copy_hash,               { desc = "Copy commit hash" } },
+                        { "n", "g!",        actions.options,                 { desc = "Open options panel" } },
+                        { "n", "zR",        actions.open_all_folds,          { desc = "Expand all folds" } },
+                        { "n", "zM",        actions.close_all_folds,         { desc = "Collapse all folds" } },
+                        { "n", "zo",        actions.open_fold,               { desc = "Expand fold" } },
+                        { "n", "zc",        actions.close_fold,              { desc = "Collapse fold" } },
+                        { "n", "za",        actions.toggle_fold,             { desc = "Toggle fold" } },
+                        { "n", "<leader>gf", actions.toggle_files,           { desc = "Toggle file panel" } },
+                        { "n", "g?",        actions.help("file_history_panel"), { desc = "Help" } },
+                    },
+                    option_panel = {
+                        { "n", "<Tab>", actions.select_entry,  { desc = "Change option" } },
+                        { "n", "q",     actions.close,         { desc = "Close options panel" } },
+                        { "n", "g?",    actions.help("option_panel"), { desc = "Help" } },
+                    },
+                },
+            })
+        end,
+    },
+    {
         "zenbones-theme/zenbones.nvim",
         dependencies = { "rktjmp/lush.nvim" },
         lazy = false,
@@ -370,18 +565,39 @@ require("lazy").setup {
     },
 }
 
+local function force_cursor(fg, bg)
+    vim.api.nvim_set_hl(0, "Cursor",  { fg = fg, bg = bg, ctermfg = 15, ctermbg = 0 })
+    vim.api.nvim_set_hl(0, "lCursor", { fg = fg, bg = bg, ctermfg = 15, ctermbg = 0 })
+    vim.api.nvim_set_hl(0, "TermCursor", { fg = fg, bg = bg, ctermfg = 15, ctermbg = 0 })
+end
+
 mapn('<leader>tl', function()
     vim.cmd("colorscheme melange")
     vim.cmd("set background=light")
+    force_cursor("#f5f1e8", "#1a1a1a")
     setup_lualine("auto")
 end, "Toggle light mode")
 mapn('<leader>td', function()
     vim.cmd("set background=dark")
     vim.cmd("colorscheme noirbuddy")
+    force_cursor("#1a1a1a", "#f1f1f1")
     local nline = require("noirbuddy.plugins.lualine")
     setup_lualine(nline.theme)
 end, "Toggle light mode")
 mapn('<leader>tz', toggle_zen_mode, "Toggle Zen Mode")
+
+local function open_terminal(direction)
+    local cmds = { r = "rightbelow vsplit", l = "leftabove vsplit", u = "leftabove split", d = "rightbelow split" }
+    local focus = { r = "wincmd l", l = "wincmd h", u = "wincmd k", d = "wincmd j" }
+    vim.cmd(cmds[direction])
+    vim.cmd(focus[direction])
+    vim.cmd("terminal")
+    vim.cmd("startinsert")
+end
+mapn('<leader>ttr', function() open_terminal('r') end, "Open terminal pane right")
+mapn('<leader>ttl', function() open_terminal('l') end, "Open terminal pane left")
+mapn('<leader>ttu', function() open_terminal('u') end, "Open terminal pane up")
+mapn('<leader>ttd', function() open_terminal('d') end, "Open terminal pane down")
 
 -- --------------------------------------- end: lazy ---------------------------------------
 
@@ -420,7 +636,30 @@ local function open_visual_selection_in_browser()
   open_in_browser(text)
 end
 
-vim.keymap.set("v", "<leader>ob", open_visual_selection_in_browser, {
+vim.keymap.set("v", "<leader>fb", open_visual_selection_in_browser, {
   desc = "Open selection in browser",
 })
+
+vim.keymap.set({ 'n', 't' }, '<leader>fe', function()
+    local word = vim.fn.expand("<cfile>")
+    if word == "" then word = vim.fn.expand("<cWORD>") end
+    if word == "" then return end
+    local path = word:gsub("^file://", "")
+    vim.cmd("edit " .. vim.fn.fnameescape(path))
+end, { desc = "Open file URI in neovim" })
+
+vim.keymap.set({ 'n', 't' }, '<leader>fa', function()
+    local word = vim.fn.expand("<cfile>")
+    if word == "" then word = vim.fn.expand("<cWORD>") end
+    if word == "" then return end
+    local path = word:gsub("^file://", "")
+    require("fzf-lua").files({ cwd = vim.fn.fnamemodify(path, ":h"), query = vim.fn.fnamemodify(path, ":t") })
+    -- if vim.fn.isdirectory(path) == 1 then
+    --     require("fzf-lua").files({ cwd = path })
+    -- elseif vim.fn.filereadable(path) == 1 then
+    --     require("fzf-lua").files({ cwd = vim.fn.fnamemodify(path, ":h"), query = vim.fn.fnamemodify(path, ":t") })
+    -- else
+    --     open_in_browser(word)
+    -- end
+end, { desc = "Open file URI via fzf-lua (or URL in browser)" })
 -- --------------------------------------- end: open in browser ---------------------------------------
